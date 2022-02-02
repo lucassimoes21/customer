@@ -1,0 +1,99 @@
+service: customer-service
+plugins:
+  - serverless-offline
+  - serverless-migrate-plugin
+
+
+frameworkVersion: ">=3.0.0 <4.0.0"
+
+provider:
+  name: aws
+  stage: dev
+  runtime: nodejs12.x
+  region: us-east-1
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+    AWS_SDK_LOAD_CONFIG: 1
+    ELASTICSEARCH_URL:
+      Fn::GetAtt: ["opeanSearchStream", "DomainEndpoint"]
+    REGION: ${self:provider.region}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+        # In real life app it should be limited to the operations the app will do, but here I put a wildcard just for quick implementation
+          Action:
+            - dynamodb:*
+          Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+        - Effect: Allow
+        # In real life app it should be limited to the operations the app will do, but here I put a wildcard just for quick implementation
+          Action:
+            - es:*
+          Resource: "*"
+
+functions:
+  expressApp:
+    name: customer-express-app
+    handler: src/index.handler
+    events:
+      - http: ANY /
+      - http: ANY /{proxy+}
+
+      # TODO split above lambda into multiple operations
+
+  awsNodeDynamoStreamToOpensearch:
+    name: aws-node-dynamo-stream-to-opensearch
+    handler: src/index.stream
+    memorySize: 128
+    timeout: 60
+    events:
+      - stream:
+          type: dynamodb
+          batchSize: 1
+          enabled: true
+          arn: { "Fn::GetAtt": ["customerDynamoDbTable", "StreamArn"] }
+
+resources:
+  Resources:
+    customerDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+        AttributeDefinitions:
+          -
+            AttributeName: pk
+            AttributeType: S
+          -
+            AttributeName: sk
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: pk
+            KeyType: HASH
+          -
+            AttributeName: sk
+            KeyType: RANGE
+        BillingMode: 'PAY_PER_REQUEST'
+        ProvisionedThroughput:
+          ReadCapacityUnits: 0
+          WriteCapacityUnits: 0
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+    opeanSearchStream:
+      Type: "AWS::Elasticsearch::Domain"
+      Properties:
+        ElasticsearchVersion: "6.3"
+        DomainName: "customer-search"
+        ElasticsearchClusterConfig:
+          DedicatedMasterEnabled: false
+          InstanceCount: "1"
+          ZoneAwarenessEnabled: false
+          InstanceType: "t2.small.elasticsearch"
+        EBSOptions:
+          EBSEnabled: true
+          Iops: 0
+          VolumeSize: 10
+          VolumeType: "gp2"
+
+        AdvancedOptions:
+          rest.action.multi.allow_explicit_index: "true"

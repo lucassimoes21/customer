@@ -1,73 +1,84 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+# Introduction
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-  
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Service built with [Serverless framework](https://www.serverless.com/) and [Typescript](https://www.typescriptlang.org/) to manage customers from [Pagaleve](https://www.pagaleve.com.br/)
 
-## Description
+# Architecture
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+![Infra](./doc/customer_service.jpg)
 
-## Installation
+# Compiling
 
-```bash
-$ npm install
-```
+You can compile the ts files in this directory by 1st installing typescript via
 
-## Running the app
+`yarn add typescript`
+
+then
+
+`yarn add`
+
+You can then run the compiler by running `tsc`or `yarn build` in this directory. It will pull the settings from .tsconfig and extra @types
+from package.json. The output create.js file is what will be uploaded by serverless.
+
+you could also use `yarn local` to start serverless structure in offline mode, when your code is done you can deploy it using `yarn deploy`
+
+
+## Usage
+
+You can create, retrieve, update, delete or do a full text search customers with the following commands:
+
+### Create a Customer
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+curl --location --request POST 'https://localhost/customer' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "email": "lucasdeoutronome@hotmail.com",
+    "age": 18,
+    "password": "123212"
+}'
 ```
 
-## Test
+
+### List all Customers
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+curl --location --request GET 'https://localhost/customer/list'
 ```
 
-## Support
+Example Result:
+```bash
+[
+  {
+    "email": "teste@hotmail.com",
+    "age": 18
+  },
+  {
+    "email": "teste2@hotmail.com",
+    "age": 18
+  },
+]
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Get one Customer
 
-## Stay in touch
+```bash
+# Replace the <email> part with a real email from your customer table
+curl --location --request GET 'https://localhost/customer/{email}'
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Example Result:
+```bash
+{
+    "email": "teste@hotmail.com",
+    "age": 18
+}
+```
 
-## License
+### Update a Customer
 
-  Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+```
+
+Example Result:
+```bash
+```
