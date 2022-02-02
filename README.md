@@ -59,26 +59,29 @@ Example Result:
 ]
 ```
 
-### Get one Customer
+### Get Customer
 
 ```bash
 # Replace the <email> part with a real email from your customer table
-curl --location --request GET 'https://localhost/customer/{email}'
+curl --location --request GET 'https://localhost/customer?email={email}'
 ```
 
 Example Result:
 ```bash
 {
     "email": "teste@hotmail.com",
-    "age": 18
+    "age": 24
 }
 ```
 
 ### Update a Customer
 
 ```bash
-```
-
-Example Result:
-```bash
+curl --location --request PUT 'https://7gtd1g7htj.execute-api.us-east-1.amazonaws.com/dev/customer' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "email": "teste@hotmail.com",
+    "password": "12",
+    "age": 24
+}'
 ```
